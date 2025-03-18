@@ -101,21 +101,14 @@ void ST7735_Init(SPI_HandleTypeDef *hspi)
 
     ST7735_SendCommandList(u8InitCmdList);
 
-    ST7735_WriteCommand(LCD_CMD_SET_DISPLAY_ON)
+    ST7735_WriteCommand(0x29)
     HAL_Delay(100);
 }
 
 // Fill Screen
 void ST7735_FillScreen(uint16_t color)
 {
-    ST7735_WriteCommand(ST7735_CASET);
-    ST7735_WriteData(0x00);
-    ST7735_WriteData(0x00);
-    ST7735_WriteCommand(ST7735_RASET);
-    ST7735_WriteData(0x00);
-    ST7735_WriteData(0x00);
-
-    ST7735_WriteCommand(ST7735_RAMWR);
+    ST7735_WriteCommand(0x2C);
     for (int i = 0; i < 128 * 160; i++) {
         ST7735_WriteData(color >> 8);
         ST7735_WriteData(color & 0xFF);
