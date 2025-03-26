@@ -52,6 +52,29 @@ Full speed: D+ high, D- low
 ```
 ![alt text](image-2.png)
 
+## PHẦN 03: USB PROTOCOL
+
+Mỗi một USB Transaction chia thành các packet:
+```cpp
+- Token Packet: Chỉ được gửi bởi host và cho biết type transaction.
+- Optional Data: Tùy thuộc vào loại transaction, packet này chứa data payload được gửi bởi host cho các OUT transaction và device cho các IN transaction.
+- Status Packet: Gói bắt tay, xác nhận transaction thành công hay thất bại.
+```
+### 3.1 Các trường dữ liệu trong packet
+Mỗi một packet lại có cái trường (field) riêng, trong đó:
+
+- Sync field: Tất cả các packet phải được bắt đầu bằng trường Sync. Trường này dài 8 bit (full/low speed) hoặc 32 bit (high speed) và được sử dụng để đồng bộ clock giữa receiver và transmitter. Hai bit cuối cho biết nơi bắt đầu của trường PID.
+- Packet Identifier Field - PID: gồm 4 bit cao cho biết packet type field và 4 bit thấp dùng để check field.  PID cho biết packet type, định dạng của packet và type error detection của packet. 4 bit check field là phần bù của 4 bit packet type field, nhằm đảm bảo dữ liệu được truyền chính xác, cho biết packet dùng để làm gì, hướng dữ liệu của packet,..., nếu là Handshake packet, chúng sẽ cho biết đã truyền nhận thành công hay chưa.
+![alt text](image-5.png)
+![alt text](image-6.png)
+- Function Address Field: Cho biết địa chỉ của function cụ thể. Độ dài 7 bit cho phép hỗ trợ 127 device. Address 0 không hợp lệ vì nó được dùng làm default address.
+- Endpoint Field: Độ dài 4 bit cho phép hỗ trợ 16 endpoint. Tuy nhiên, đối với low speed device chỉ có thêm 2 endpoint được thêm với default pipe (max 3 endpoint).
+- Data Field: Trường dữ liệu có thể nằm trong khoảng 0 đến 1024 byte. Các bit trong mỗi byte được dịch từ LSB đầu tiên. Kích thước của data field tuỳ thuộc vào transfer type.
+- Cyclic Redundancy Checks - CRC: được sử dụng để bảo vệ tất cả các trường không phải là PID trong token và data packet. Các token packet có 5 bit CRC, trong khi data packets có 16 bit CRC.
+- End Of Packet - EOP: cho biết packet kết thúc.
+
+
+
 ### 1.2 Packets USB
 Token Packets: Cho biết loại giao dịch phải tuân theo.
 Data Packets: Gói chứa dữ liệu cần truyền, nhận.
