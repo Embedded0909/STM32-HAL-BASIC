@@ -207,7 +207,11 @@ Semaphore gồm:
 - Semaphone hoạt động như một chìa khóa cho việc truy cập tới tài nguyên
 - Để có thể sử dụng tài nguyên, task cần require chìa khóa để sử dụng
 - Nếu chìa khóa đang không có task nào sử dụng thì task có thể sử dụng tài nguyên
-- Sau khi dùng xong, task này phải release chìa khóa để các task khác có thể sử dụng
+- Sau khi dùng xong, task này phải release chìa khóa để các task khác có thể sử dụng, tuy nhiên với counting semaphore thì nhiều task có thể truy cập tài nguyên đồng thời. Semaphore có thể được giải phóng (signal) và chờ (wait) bởi bất kỳ tác vụnào, không nhất thiết phải là tác vụ đã khóa semaphore. Điều này làm cho semaphore linh hoạt hơn trong việc quản lý tài nguyên chia sẻ.
+
+```cpp
+Hoạt động theo cơ chế Signaling
+```
 
  ⚠️ Note: Khi sử dụng semaphore sẽ có thể gặp một vấn đề là đảo ngược độ ưu tiên
  Tức là khi task có độ ưu tiên thấp đang giữ semaphore thì task có độ ưu tiên cao hơn phải đợi task có độ ưu tiên thấp hơn thực thi xong thì mới được sử dụng
@@ -216,6 +220,57 @@ Semaphore gồm:
 
 ![alt text](image/image-28.png)
 
+#### 3.4 Mutex
+
+API Mutex
+
+```cpp
+-----------------------------------------------------
+Feature	                |CMSIS RTOS                 |
+-----------------------------------------------------
+Create mutex	        |osMutexCreate	            |
+Delete mutex	        |osMutexDelete	            |
+Acquire mutex	        |osMutexWait	            |
+Release mutex	        |osMutexRelease	            |
+Create recursivemutex	|osRecursiveMutexCreate	    |
+Acquire recursivemutex	|osRecursiveMutexWait	    |
+Release recursivemutex	|osRecursiveMutexRelease    |
+-----------------------------------------------------
+```
+
+- Là 1 Semaphore đặc biệt 
+- Mutex (Mutial Exclusion) tức là loại trừ lẫn nhau, thực chất nó là một Key (Khóa) đảm bảo chỉ có một task duy nhất được quyền truy cập vào tài nguyên tại một thời điểm.
+- Nó hoạt động theo cơ chế blocking, tức là một task sẽ Acquire Mutex khi cần sử dụng tài nguyên chung, và sau khi sử dụng xong thì nó sẽ Release Mutex để cho các task khác có thể thực hiện. Nếu Mutex đang được một task sử dụng thì những task khác sẽ phải chờ để nhận được Mutex
+
+![alt text](image/image-29.png)
+
+
+⚠️ Nói chuẩn ra là gặp trường hợp y như thằng semaphore, tuy nhiên thằng này có cơ chế gỡ rối đó là " Kế thừa ưu tiên "
+- Mutex còn có cơ chế kế thừa độ ưu tiên
+VD cụ thể: task A đang giữ Mutex, nếu task B có mức độ ưu tiên cao hơn muốn lấy Mutex thì task A sẽ kế thừa độ ưu tiên của task B. Khi task A nhả Mutex thì nó sẽ trở về mức ưu tiên ban đầu
+```cpp
+⚠️ Tuy nhiên đối với thằng Mutext cũng có trường hợp rơi vào bế tắc như sau:
+A giữ Mutex M1, B giữ Mutex M2
+A cần Mutex M2 để chạy -> A bị block do B đang giữ M2
+B cần Mutex M1 để chạy -> B bị block do A đang giữ M1
+--> Cả 2 đều bị block 
+--> Để giải quyết vấn đề này --> Cần có timeout, nếu không lấy được M2 -> giải phóng M1 và tương tự như vậy
+```
+
+#### 3.5 Mutex & Binary Semaphore 
+
+Mutex và Binary Semaphore có cách hoạt động tương đối giống nhau, tuy nhiên cần phân biệt rõ
+```cpp
+Name	            | Mutex	                   | Binary Semaphore
+-----------------------------------------------------------------------------------
+Cơ chế	            | Locking 	                   | Signaling 
+Ownership           | Chỉ task sở hữu nhả được     | Bất kỳ task nào cũng nhả được
+Priority Inheritance| Có   	                   | Không
+Tốc độ	            | Chậm hơn                     | Nhanh hơn 
+Ứng dụng            | Bảo vệ tài nguyên duy nhất   | Đồng bộ đơn giản 
+```
+
+#### 3.6 Event group
 ### PHẦN 04 KẾT LUẬN
 ```cpp
 Việc tạo Task và hiểu cơ chế Scheduling rất quan trọng khi học hệ điều hành RTOS, chúng giúp chúng ta có cái nhìn chính xác 
@@ -223,6 +278,7 @@ về quá trình khởi tạo và chạy các Task.
 
 Để đảm bảo các Task được chạy một cách tối ưu, thông thường người ta sẽ thiết kế Timing diagram cho chương trình của mình. 
 Điều này sẽ giúp các luồng được quản lý chặt chẽ hơn.
+
 ```
 
 Task
