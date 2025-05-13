@@ -102,7 +102,6 @@ Trong arm cortex M3+
 ![alt text](image/image-17.png)
 
 
-
 Cách quản lý Heap của freeRTOS
 ```cpp
 - Heap_1: Không cho phép giải phóng bộ nhớ.

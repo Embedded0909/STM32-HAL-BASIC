@@ -146,15 +146,25 @@ mềm) bởi Host hoặc Device.
 phát từ Host. Dữ liệu được truyền đi theo hướng mong muốn dựa trên request từ Host. Nó hỗ trợ truyền dữ liệu cả 2 hướng và chỉ hỗ 
 trợ Control Transfer thôi
 ```
-## PHẦN 05: STM32 USB CDC
+## PHẦN 05: USB COMMUNICATION FLOW
+
+- Cơ chế truyền dữ liệu liên quan đến việc host đọc và ghi vào các bộ nhớ trên mỗi thiết bị. Các bộ nhớ này được gọi là endpoint. Về cơ bản, có thể hiểu các endpoint là các buffer in và out.
+![alt text](images/image16.png)
+
+- Khi host muốn gửi data  đến một device, data được lưu tại endpoint OUT của device  thông qua việc sử dụng WRITE transaction. Firmware device sẽ giám sát các endpoint OUT để xác định xem có data nào được nhận từ host hay không.
+![alt text](images/image17.png)
+- Nếu device muốn giao tiếp với host, data  sẽ được lưu tại endpoint IN. Data sẽ vẫn nằm tại endpoint IN cho đến khi host release READ transaction. READ transaction khiến data của endpoint IN được gửi đến máy chủ.
+![alt text](images/image18.png)
+
+## PHẦN 06: STM32 USB CDC
 Khi sử dụng thằng này thì chính là sử dụng thông qua Bulk
 
 - Bulk Transfer được sử dụng khi cần truyền tải lượng dữ liệu lớn (ví dụ như khi sử dụng thiết bị USB như serial port hoặc các thiết bị lưu trữ như USB flash drives)
 
-### 5.1 USB CDC là gì?
+### 6.1 USB CDC là gì?
 Trong STM32f103c8t6 chỉ hỗ trợ giao thưc USB kiểu Device, thế nên ta sẽ sử dụng kit Bluepill như một thiết bị để truyền nhận dữ liệu giữa nó và máy tính.
 
-### 5.2 Lập trình USB CDC với STM32
+### 6.2 Lập trình USB CDC với STM32
 Cùng code và đọc 2 chân tín hiệu D+, D- để biết dữ liệu được truyền đi như thế nào
 ![alt text](images/image-15.png)
 
